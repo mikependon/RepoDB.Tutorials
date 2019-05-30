@@ -1,0 +1,15 @@
+C:\Users\MichaelP\Source\Repos\TreeViewFileExplorer\TreeViewFileExplorer\bin\Debug\TreeViewFileExplorer.exe.config
+C:\Users\MichaelP\Source\Repos\TreeViewFileExplorer\TreeViewFileExplorer\bin\Debug\TreeViewFileExplorer.exe
+C:\Users\MichaelP\Source\Repos\TreeViewFileExplorer\TreeViewFileExplorer\bin\Debug\TreeViewFileExplorer.pdb
+C:\Users\MichaelP\Source\Repos\TreeViewFileExplorer\TreeViewFileExplorer\obj\Debug\MainWindow.g.cs
+C:\Users\MichaelP\Source\Repos\TreeViewFileExplorer\TreeViewFileExplorer\obj\Debug\App.g.cs
+C:\Users\MichaelP\Source\Repos\TreeViewFileExplorer\TreeViewFileExplorer\obj\Debug\TreeViewFileExplorer_MarkupCompile.cache
+C:\Users\MichaelP\Source\Repos\TreeViewFileExplorer\TreeViewFileExplorer\obj\Debug\TreeViewFileExplorer_MarkupCompile.lref
+C:\Users\MichaelP\Source\Repos\TreeViewFileExplorer\TreeViewFileExplorer\obj\Debug\MainWindow.baml
+C:\Users\MichaelP\Source\Repos\TreeViewFileExplorer\TreeViewFileExplorer\obj\Debug\TreeViewFileExplorer.g.resources
+C:\Users\MichaelP\Source\Repos\TreeViewFileExplorer\TreeViewFileExplorer\obj\Debug\TreeViewFileExplorer.Properties.Resources.resources
+C:\Users\MichaelP\Source\Repos\TreeViewFileExplorer\TreeViewFileExplorer\obj\Debug\TreeViewFileExplorer.csproj.GenerateResource.cache
+C:\Users\MichaelP\Source\Repos\TreeViewFileExplorer\TreeViewFileExplorer\obj\Debug\TreeViewFileExplorer.csproj.CoreCompileInputs.cache
+C:\Users\MichaelP\Source\Repos\TreeViewFileExplorer\TreeViewFileExplorer\obj\Debug\TreeViewFileExplorer.exe
+C:\Users\MichaelP\Source\Repos\TreeViewFileExplorer\TreeViewFileExplorer\obj\Debug\TreeViewFileExplorer.pdb
+C:\Users\MichaelP\Source\Repos\TreeViewFileExplorer\TreeViewFileExplorer\obj\Debug\GeneratedInternalTypeHelper.g.cs
