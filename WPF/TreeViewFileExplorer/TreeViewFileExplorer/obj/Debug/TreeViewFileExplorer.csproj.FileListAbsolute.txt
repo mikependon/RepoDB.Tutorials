@@ -13,3 +13,4 @@ C:\Users\MichaelP\Source\Repos\TreeViewFileExplorer\TreeViewFileExplorer\obj\Deb
 C:\Users\MichaelP\Source\Repos\TreeViewFileExplorer\TreeViewFileExplorer\obj\Debug\TreeViewFileExplorer.exe
 C:\Users\MichaelP\Source\Repos\TreeViewFileExplorer\TreeViewFileExplorer\obj\Debug\TreeViewFileExplorer.pdb
 C:\Users\MichaelP\Source\Repos\TreeViewFileExplorer\TreeViewFileExplorer\obj\Debug\GeneratedInternalTypeHelper.g.cs
+C:\Users\MichaelP\Source\Repos\TreeViewFileExplorer\TreeViewFileExplorer\obj\Debug\TreeViewFileExplorer.csprojAssemblyReference.cache

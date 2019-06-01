@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using TreeViewFileExplorer.ShellClasses;
@@ -13,23 +14,19 @@ namespace TreeViewFileExplorer
         public MainWindow()
         {
             InitializeComponent();
+            InitializeFileSystemObjects();
+        }
 
-            // Get all drives
+        private void InitializeFileSystemObjects()
+        {
             var drives = DriveInfo.GetDrives();
-
-            // Iterate each drive
-            foreach (var drive in drives)
+            DriveInfo.GetDrives().ToList().ForEach(drive =>
             {
-                // Create an FSO
                 var fileSystemObject = new FileSystemObjectInfo(drive);
-
-                // Handle the events
                 fileSystemObject.BeforeExplore += FileSystemObject_BeforeExplore;
                 fileSystemObject.AfterExplore += FileSystemObject_AfterExplore;
-
-                // Add the item
-                this.treeView.Items.Add(fileSystemObject);
-            }
+                treeView.Items.Add(fileSystemObject);
+            });
         }
 
         private void FileSystemObject_AfterExplore(object sender, System.EventArgs e)

@@ -6,20 +6,14 @@ namespace TreeViewFileExplorer
     [Serializable]
     public abstract class PropertyNotifier : INotifyPropertyChanged
     {
-        public PropertyNotifier()
-            : base()
-        {
-        }
+        public PropertyNotifier() : base() { }
 
         [field: NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected void OnPropertyChanged(string propertyName)
         {
-            if (!object.ReferenceEquals(this.PropertyChanged, null))
-            {
-                this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

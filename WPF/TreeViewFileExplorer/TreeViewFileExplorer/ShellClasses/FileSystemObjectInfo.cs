@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Windows.Media;
@@ -11,19 +12,25 @@ namespace TreeViewFileExplorer.ShellClasses
     {
         public FileSystemObjectInfo(FileSystemInfo info)
         {
-            if (this is DummyFileSystemObjectInfo) return;
-            this.Children = new ObservableCollection<FileSystemObjectInfo>();
-            this.FileSystemInfo = info;
+            if (this is DummyFileSystemObjectInfo)
+            {
+                return;
+            }
+
+            Children = new ObservableCollection<FileSystemObjectInfo>();
+            FileSystemInfo = info;
+
             if (info is DirectoryInfo)
             {
-                this.ImageSource = FolderManager.GetImageSource(info.FullName, ItemState.Close);
-                this.AddDummy();
+                ImageSource = FolderManager.GetImageSource(info.FullName, ItemState.Close);
+                AddDummy();
             }
             else if (info is FileInfo)
             {
-                this.ImageSource = FileManager.GetImageSource(info.FullName);
+                ImageSource = FileManager.GetImageSource(info.FullName);
             }
-            this.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(FileSystemObjectInfo_PropertyChanged);
+
+            PropertyChanged += new PropertyChangedEventHandler(FileSystemObjectInfo_PropertyChanged);
         }
 
         public FileSystemObjectInfo(DriveInfo drive)
@@ -65,28 +72,28 @@ namespace TreeViewFileExplorer.ShellClasses
 
         #region EventHandlers
 
-        void FileSystemObjectInfo_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        void FileSystemObjectInfo_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (this.FileSystemInfo is DirectoryInfo)
+            if (FileSystemInfo is DirectoryInfo)
             {
                 if (string.Equals(e.PropertyName, "IsExpanded", StringComparison.CurrentCultureIgnoreCase))
                 {
                     RaiseBeforeExpand();
-                    if (this.IsExpanded)
+                    if (IsExpanded)
                     {
-                        this.ImageSource = FolderManager.GetImageSource(this.FileSystemInfo.FullName, ItemState.Open);
-                        if (this.HasDummy())
+                        ImageSource = FolderManager.GetImageSource(FileSystemInfo.FullName, ItemState.Open);
+                        if (HasDummy())
                         {
                             RaiseBeforeExplore();
-                            this.RemoveDummy();
-                            this.ExploreDirectories();
-                            this.ExploreFiles();
+                            RemoveDummy();
+                            ExploreDirectories();
+                            ExploreFiles();
                             RaiseAfterExplore();
                         }
                     }
                     else
                     {
-                        this.ImageSource = FolderManager.GetImageSource(this.FileSystemInfo.FullName, ItemState.Close);
+                        ImageSource = FolderManager.GetImageSource(FileSystemInfo.FullName, ItemState.Close);
                     }
                     RaiseAfterExpand();
                 }
@@ -99,32 +106,32 @@ namespace TreeViewFileExplorer.ShellClasses
 
         public ObservableCollection<FileSystemObjectInfo> Children
         {
-            get { return base.GetValue<ObservableCollection<FileSystemObjectInfo>>("Children"); }
-            private set { base.SetValue("Children", value); }
+            get { return GetValue<ObservableCollection<FileSystemObjectInfo>>("Children"); }
+            private set { SetValue("Children", value); }
         }
 
         public ImageSource ImageSource
         {
-            get { return base.GetValue<ImageSource>("ImageSource"); }
-            private set { base.SetValue("ImageSource", value); }
+            get { return GetValue<ImageSource>("ImageSource"); }
+            private set { SetValue("ImageSource", value); }
         }
 
         public bool IsExpanded
         {
-            get { return base.GetValue<bool>("IsExpanded"); }
-            set { base.SetValue("IsExpanded", value); }
+            get { return GetValue<bool>("IsExpanded"); }
+            set { SetValue("IsExpanded", value); }
         }
 
         public FileSystemInfo FileSystemInfo
         {
-            get { return base.GetValue<FileSystemInfo>("FileSystemInfo"); }
-            private set { base.SetValue("FileSystemInfo", value); }
+            get { return GetValue<FileSystemInfo>("FileSystemInfo"); }
+            private set { SetValue("FileSystemInfo", value); }
         }
 
         private DriveInfo Drive
         {
-            get { return base.GetValue<DriveInfo>("Drive"); }
-            set { base.SetValue("Drive", value); }
+            get { return GetValue<DriveInfo>("Drive"); }
+            set { SetValue("Drive", value); }
         }
 
         #endregion
@@ -133,90 +140,74 @@ namespace TreeViewFileExplorer.ShellClasses
 
         private void AddDummy()
         {
-            this.Children.Add(new DummyFileSystemObjectInfo());
+            Children.Add(new DummyFileSystemObjectInfo());
         }
 
         private bool HasDummy()
         {
-            return !object.ReferenceEquals(this.GetDummy(), null);
+            return GetDummy() != null;
         }
 
         private DummyFileSystemObjectInfo GetDummy()
         {
-            var list = this.Children.OfType<DummyFileSystemObjectInfo>().ToList();
-            if (list.Count > 0) return list.First();
-            return null;
+            return Children.OfType<DummyFileSystemObjectInfo>().FirstOrDefault();
         }
 
         private void RemoveDummy()
         {
-            this.Children.Remove(this.GetDummy());
+            Children.Remove(GetDummy());
         }
 
         private void ExploreDirectories()
         {
-            if (!object.ReferenceEquals(this.Drive, null))
+            if (Drive?.IsReady == false)
             {
-                if (!this.Drive.IsReady) return;
+                return;
             }
-            try
+            if (FileSystemInfo is DirectoryInfo)
             {
-                if (this.FileSystemInfo is DirectoryInfo)
+                var directories = ((DirectoryInfo)FileSystemInfo).GetDirectories();
+                foreach (var directory in directories.OrderBy(d => d.Name))
                 {
-                    var directories = ((DirectoryInfo)this.FileSystemInfo).GetDirectories();
-                    foreach (var directory in directories.OrderBy(d => d.Name))
+                    if ((directory.Attributes & FileAttributes.System) != FileAttributes.System &&
+                        (directory.Attributes & FileAttributes.Hidden) != FileAttributes.Hidden)
                     {
-                        if (!object.Equals((directory.Attributes & FileAttributes.System), FileAttributes.System) &&
-                            !object.Equals((directory.Attributes & FileAttributes.Hidden), FileAttributes.Hidden))
-                        {
-                            var fso = new FileSystemObjectInfo(directory);
-                            fso.BeforeExplore += Fso_BeforeExplore;
-                            fso.AfterExplore += Fso_AfterExplore;
-                            this.Children.Add(fso);
-                        }
+                        var fileSystemObject = new FileSystemObjectInfo(directory);
+                        fileSystemObject.BeforeExplore += FileSystemObject_BeforeExplore;
+                        fileSystemObject.AfterExplore += FileSystemObject_AfterExplore;
+                        Children.Add(fileSystemObject);
                     }
                 }
             }
-            catch
-            {
-                /*throw;*/
-            }
         }
 
-        private void Fso_AfterExplore(object sender, EventArgs e)
+        private void FileSystemObject_AfterExplore(object sender, EventArgs e)
         {
             RaiseAfterExplore();
         }
 
-        private void Fso_BeforeExplore(object sender, EventArgs e)
+        private void FileSystemObject_BeforeExplore(object sender, EventArgs e)
         {
             RaiseBeforeExplore();
         }
 
         private void ExploreFiles()
         {
-            if (!object.ReferenceEquals(this.Drive, null))
+            if (Drive?.IsReady == false)
             {
-                if (!this.Drive.IsReady) return;
+                return;
             }
-            try
+            if (FileSystemInfo is DirectoryInfo)
             {
-                if (this.FileSystemInfo is DirectoryInfo)
+                var files = ((DirectoryInfo)FileSystemInfo).GetFiles();
+                foreach (var file in files.OrderBy(d => d.Name))
                 {
-                    var files = ((DirectoryInfo)this.FileSystemInfo).GetFiles();
-                    foreach (var file in files.OrderBy(d => d.Name))
+                    if ((file.Attributes & FileAttributes.System) != FileAttributes.System &&
+                        (file.Attributes & FileAttributes.Hidden) != FileAttributes.Hidden)
                     {
-                        if (!object.Equals((file.Attributes & FileAttributes.System), FileAttributes.System) &&
-                            !object.Equals((file.Attributes & FileAttributes.Hidden), FileAttributes.Hidden))
-                        {
-                            this.Children.Add(new FileSystemObjectInfo(file));
-                        }
+                        Children.Add(new FileSystemObjectInfo(file));
                     }
                 }
-            }
-            catch
-            {
-                /*throw;*/
             }
         }
 

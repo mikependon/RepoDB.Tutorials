@@ -6,24 +6,12 @@ namespace TreeViewFileExplorer
     [Serializable]
     public abstract class BaseObject : PropertyNotifier
     {
-        private IDictionary<string, object> m_values = new Dictionary<string, object>(StringComparer.CurrentCultureIgnoreCase);
-
-        public BaseObject()
-        {
-        }
+        private IDictionary<string, object> m_values = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
         public T GetValue<T>(string key)
         {
-            if (string.IsNullOrEmpty(key))
-            {
-                return default(T);
-            }
-            var value = this.GetValue(key);
-            if (value is T)
-            {
-                return (T)value;
-            }
-            return default(T);
+            var value = GetValue(key);
+            return (value is T) ? (T)value : default(T);
         }
 
         private object GetValue(string key)
@@ -32,24 +20,20 @@ namespace TreeViewFileExplorer
             {
                 return null;
             }
-            if (this.m_values.ContainsKey(key))
-            {
-                return this.m_values[key];
-            }
-            return null;
+            return m_values.ContainsKey(key) ? m_values[key] : null;
         }
 
         public void SetValue(string key, object value)
         {
-            if (!this.m_values.ContainsKey(key))
+            if (!m_values.ContainsKey(key))
             {
-                this.m_values.Add(key, value);
+                m_values.Add(key, value);
             }
             else
             {
-                this.m_values[key] = value;
+                m_values[key] = value;
             }
-            base.OnPropertyChanged(key);
+            OnPropertyChanged(key);
         }
     }
 }

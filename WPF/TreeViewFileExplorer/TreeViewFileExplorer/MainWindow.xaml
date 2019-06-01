@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:TreeViewFileExplorer"
         xmlns:classes="clr-namespace:TreeViewFileExplorer.ShellClasses"
         mc:Ignorable="d"
-        Title="TreeView File Explorer for Windows" Height="450" Width="800">
+        Title="TreeView File Explorer for Windows (by Michael Pendon)" Height="450" Width="800">
     <TreeView Name="treeView" Margin="5">
         <TreeView.ItemContainerStyle>
             <Style TargetType="{x:Type TreeViewItem}">

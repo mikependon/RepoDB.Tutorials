@@ -59,6 +59,8 @@
     <Compile Include="Enums\IconSize.cs" />
     <Compile Include="Enums\ItemState.cs" />
     <Compile Include="Enums\ItemType.cs" />
+    <Compile Include="Enums\FileAttribute.cs" />
+    <Compile Include="Enums\ShellAttribute.cs" />
     <Compile Include="FileManager.cs" />
     <Compile Include="Interop.cs" />
     <Compile Include="FolderManager.cs" />

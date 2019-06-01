@@ -8,29 +8,36 @@ namespace TreeViewFileExplorer
 {
     public class ShellManager
     {
-        public static Icon GetIcon(string path, ItemType type, IconSize size, ItemState state)
+        public static Icon GetIcon(string path, ItemType type, IconSize iconSize, ItemState state)
         {
-            var flags = (uint)(Interop.SHGFI_ICON | Interop.SHGFI_USEFILEATTRIBUTES);
-            var attribute = (uint)(object.Equals(type, ItemType.Folder) ? Interop.FILE_ATTRIBUTE_DIRECTORY : Interop.FILE_ATTRIBUTE_FILE);
-            if (object.Equals(type, ItemType.Folder) && object.Equals(state, ItemState.Open))
+            var attributes = (uint)(type == ItemType.Folder ? FileAttribute.Directory : FileAttribute.File);
+            var flags = (uint)(ShellAttribute.Icon | ShellAttribute.UseFileAttributes);
+
+            if (type == ItemType.Folder && state == ItemState.Open)
             {
-                flags += Interop.SHGFI_OPENICON;
+                flags = flags | (uint)ShellAttribute.OpenIcon;
             }
-            if (object.Equals(size, IconSize.Small))
+            if (iconSize == IconSize.Small)
             {
-                flags += Interop.SHGFI_SMALLICON;
+                flags = flags | (uint)ShellAttribute.SmallIcon;
             }
             else
             {
-                flags += Interop.SHGFI_LARGEICON;
+                flags = flags | (uint)ShellAttribute.LargeIcon;
             }
-            var shfi = new ShellFileInfo();
-            var res = Interop.SHGetFileInfo(path, attribute, out shfi, (uint)Marshal.SizeOf(shfi), flags);
-            if (object.Equals(res, IntPtr.Zero)) throw Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error());
+
+            var fileInfo = new ShellFileInfo();
+            var size = (uint)Marshal.SizeOf(fileInfo);
+            var result = Interop.SHGetFileInfo(path, attributes, out fileInfo, size, flags);
+
+            if (result == IntPtr.Zero)
+            {
+                throw Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error());
+            }
+
             try
             {
-                Icon.FromHandle(shfi.hIcon);
-                return (Icon)Icon.FromHandle(shfi.hIcon).Clone();
+                return (Icon)Icon.FromHandle(fileInfo.hIcon).Clone();
             }
             catch
             {
@@ -38,7 +45,7 @@ namespace TreeViewFileExplorer
             }
             finally
             {
-                Interop.DestroyIcon(shfi.hIcon);
+                Interop.DestroyIcon(fileInfo.hIcon);
             }
         }
     }
