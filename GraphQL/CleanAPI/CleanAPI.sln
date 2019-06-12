@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2042
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CleanAPI", "CleanAPI\CleanAPI.csproj", "{ECD2FECB-A89E-4FEF-873E-C123B4FFD10E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{ECD2FECB-A89E-4FEF-873E-C123B4FFD10E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ECD2FECB-A89E-4FEF-873E-C123B4FFD10E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ECD2FECB-A89E-4FEF-873E-C123B4FFD10E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ECD2FECB-A89E-4FEF-873E-C123B4FFD10E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1ED504C5-481B-4B23-9306-F4ED4DD1367B}
+	EndGlobalSection
+EndGlobal
