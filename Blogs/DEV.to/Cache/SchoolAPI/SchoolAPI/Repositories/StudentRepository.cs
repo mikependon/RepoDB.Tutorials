@@ -25,7 +25,7 @@ namespace SchoolAPI.Repositories
 
         public void SaveAll(IList<Student> students)
         {
-            InsertAll(students);
+            this.BulkInsert(students);
         }
     }
 }
