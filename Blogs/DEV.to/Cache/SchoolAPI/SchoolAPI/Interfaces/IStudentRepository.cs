@@ -7,6 +7,6 @@ namespace SchoolAPI.Interfaces
     {
         IEnumerable<Student> GetAllStudents();
         int Save(Student student);
-        void SaveAll(IList<Student> students);
+        int SaveAll(IList<Student> students);
     }
 }
