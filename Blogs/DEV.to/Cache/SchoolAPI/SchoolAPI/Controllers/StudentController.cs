@@ -93,12 +93,12 @@ namespace SchoolAPI.Controllers
                 students.Add(student);
             }
 
-            m_studentRepository.SaveAll(students);
-
+            var insertedResult = m_studentRepository.SaveAll(students);
             var elapsed = (DateTime.UtcNow - dateTime).TotalMilliseconds;
+            
             return new
             {
-                Inserted = students.Count,
+                Inserted = insertedResult,
                 ElapsedInMilliseconds = elapsed
             };
         }
