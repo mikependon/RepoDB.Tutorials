@@ -3,6 +3,7 @@ using PropertyHandler.Factories;
 using PropertyHandler.Models;
 using RepoDb;
 using RepoDb.Extensions;
+using RepoDb.SqlServer;
 using System;
 
 namespace PropertyHandler
@@ -11,6 +12,7 @@ namespace PropertyHandler
     {
         static void Main(string[] args)
         {
+            SqlServerBootstrap.Initialize();
             ClearPerson();
             InsertPerson();
             QueryPerson();

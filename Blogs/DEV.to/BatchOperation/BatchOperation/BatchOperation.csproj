@@ -6,7 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="RepoDb" Version="1.10.4" />
+    <PackageReference Include="RepoDb" Version="1.10.8" />
+    <PackageReference Include="RepoDb.SqlServer" Version="1.0.2" />
   </ItemGroup>
 
 </Project>
