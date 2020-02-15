@@ -3,7 +3,6 @@ using PropertyHandler.Factories;
 using PropertyHandler.Models;
 using RepoDb;
 using RepoDb.Extensions;
-using RepoDb.SqlServer;
 using System;
 
 namespace PropertyHandler
@@ -12,10 +11,15 @@ namespace PropertyHandler
     {
         static void Main(string[] args)
         {
-            SqlServerBootstrap.Initialize();
+            // Intialize the RepoDb for SQL Server
+            RepoDb.SqlServer.SqlServerBootstrap.Initialize();
+
+            // Calls to the method
             ClearPerson();
             InsertPerson();
             QueryPerson();
+
+            // Exit the console
             Console.WriteLine("Press any key to exit.");
             Console.ReadLine();
         }
@@ -38,9 +42,7 @@ namespace PropertyHandler
             using (var connection = GetConnection())
             {
                 var people = PersonFactory.CreateMultiple(100).AsList();
-                var result = connection.InsertAll(people);
-                connection.MergeAll(people);
-                connection.UpdateAll(people);
+                connection.InsertAll(people);
             }
         }
 
@@ -48,7 +50,7 @@ namespace PropertyHandler
         {
             using (var connection = GetConnection())
             {
-                var person = connection.QueryAll<Person>();
+                var people = connection.QueryAll<Person>();
             }
         }
     }
