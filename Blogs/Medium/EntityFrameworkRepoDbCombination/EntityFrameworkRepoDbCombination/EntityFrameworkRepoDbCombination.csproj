@@ -11,8 +11,4 @@
     <PackageReference Include="RepoDb.SqlServer.BulkOperations" Version="1.0.11" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Database\" />
-  </ItemGroup>
-
 </Project>
