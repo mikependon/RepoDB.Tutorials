@@ -13,9 +13,15 @@ namespace EntityFrameworkRepoDbCombination
         static void Main(string[] args)
         {
             var rows = 100000;
+
+            // Initialize
             Initialize();
 
+            // Truncate
+            TruncateRepoDb();
+
             // First Run
+            Console.WriteLine(new string(char.Parse("-"), 75));
             Console.WriteLine("First run with compilation!");
             BulkInsertRepoDb(rows);
             AddRangeEF(rows);
@@ -24,13 +30,17 @@ namespace EntityFrameworkRepoDbCombination
             QueryRepoDb();
 
             // Second Run
-            Console.WriteLine(new string(char.Parse("-"), 100));
+            Console.WriteLine(new string(char.Parse("-"), 75));
             Console.WriteLine("Second run without compilation!");
             BulkInsertRepoDb(rows);
             AddRangeEF(rows);
             InsertAllRepoDb(rows);
             QueryEF();
             QueryRepoDb();
+
+            // Truncate
+            Console.WriteLine(new string(char.Parse("-"), 75));
+            TruncateRepoDb();
         }
 
         static void Initialize()
@@ -54,6 +64,15 @@ namespace EntityFrameworkRepoDbCombination
             }
         }
 
+        static void TruncateRepoDb()
+        {
+            using (var repository = new DatabaseRepository())
+            {
+                repository.Truncate<Person>();
+                Console.WriteLine($"RepoDb.Truncate: Table '{ClassMappedNameCache.Get<Person>()}' has been truncated.");
+            }
+        }
+
         static void BulkInsertRepoDb(int count)
         {
             var people = GetPeople(count).ToList();
@@ -74,6 +93,31 @@ namespace EntityFrameworkRepoDbCombination
                 context.People.AddRange(people);
                 context.SaveChanges();
                 Console.WriteLine($"EF.AddRange: {people.Count()} row(s) affected for {(DateTime.UtcNow - now).TotalSeconds} second(s).");
+            }
+        }
+
+        static void UpdateInEF()
+        {
+            using (var context = new DatabaseContext())
+            {
+                //var person = context.People.FirstOrDefault(e => e.Id == 2);
+                //person.ExtendedInfo = $"{person.ExtendedInfo}-Updated";
+                context.People.Update(new Person
+                {
+                    Id = 2,
+                    ExtendedInfo = $"{Guid.NewGuid()}-Updated"
+                });
+                context.SaveChanges();
+            }
+        }
+
+        static void DeleteInEF()
+        {
+            using (var context = new DatabaseContext())
+            {
+                context.People.Remove(new Person { Id = 1 });
+                context.People.Remove(context.People.FirstOrDefault(e => e.Id == 10));
+                context.SaveChanges();
             }
         }
 
