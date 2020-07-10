@@ -1,7 +1,9 @@
 ﻿using EntityFrameworkRepoDbCombination.DbContexts;
 using EntityFrameworkRepoDbCombination.Models;
 using EntityFrameworkRepoDbCombination.Repositories;
+using Microsoft.EntityFrameworkCore;
 using RepoDb;
+using RepoDb.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,11 +20,9 @@ namespace EntityFrameworkRepoDbCombination
             Initialize();
 
             // Truncate
-            TruncateRepoDb();
-
-            // First Run
-            Console.WriteLine(new string(char.Parse("-"), 75));
             Console.WriteLine("First run with compilation!");
+            Console.WriteLine(new string(char.Parse("-"), 75));
+            TruncateRepoDb();
             BulkInsertRepoDb(rows);
             AddRangeEF(rows);
             InsertAllRepoDb(rows);
@@ -30,8 +30,9 @@ namespace EntityFrameworkRepoDbCombination
             QueryRepoDb();
 
             // Second Run
-            Console.WriteLine(new string(char.Parse("-"), 75));
             Console.WriteLine("Second run without compilation!");
+            Console.WriteLine(new string(char.Parse("-"), 75));
+            TruncateRepoDb();
             BulkInsertRepoDb(rows);
             AddRangeEF(rows);
             InsertAllRepoDb(rows);
@@ -137,6 +138,12 @@ namespace EntityFrameworkRepoDbCombination
             var now = DateTime.UtcNow;
             using (var context = new DatabaseContext())
             {
+                var people = context.People.FromSqlRaw("SELECT * FROM [dbo].[Person]").ToList();
+                Console.WriteLine($"EF.People (Raw): {people.Count()} row(s) affected for {(DateTime.UtcNow - now).TotalSeconds} second(s).");
+            }
+            now = DateTime.UtcNow;
+            using (var context = new DatabaseContext())
+            {
                 var people = context.People.ToList();
                 Console.WriteLine($"EF.People: {people.Count()} row(s) affected for {(DateTime.UtcNow - now).TotalSeconds} second(s).");
             }
@@ -147,8 +154,20 @@ namespace EntityFrameworkRepoDbCombination
             var now = DateTime.UtcNow;
             using (var repository = new DatabaseRepository())
             {
-                var people = repository.QueryAll<Person>();
+                var people = repository.ExecuteQuery<Person>("SELECT * FROM [dbo].[Person]").AsList();
+                Console.WriteLine($"RepoDb.ExecuteQuery: {people.Count()} row(s) affected for {(DateTime.UtcNow - now).TotalSeconds} second(s).");
+            }
+            now = DateTime.UtcNow;
+            using (var repository = new DatabaseRepository())
+            {
+                var people = repository.QueryAll<Person>().AsList(); ;
                 Console.WriteLine($"RepoDb.QueryAll: {people.Count()} row(s) affected for {(DateTime.UtcNow - now).TotalSeconds} second(s).");
+            }
+            now = DateTime.UtcNow;
+            using (var repository = new DatabaseRepository())
+            {
+                var people = repository.QueryAll<Person>(cacheKey: "People").AsList(); ;
+                Console.WriteLine($"RepoDb.QueryAll (Cache): {people.Count()} row(s) affected for {(DateTime.UtcNow - now).TotalSeconds} second(s).");
             }
         }
     }
