@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29728.190
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RepoDbDemo", "RepoDbDemo\RepoDbDemo.csproj", "{09904ADE-7679-4B8D-8C9F-A3D1CD4AAE97}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{09904ADE-7679-4B8D-8C9F-A3D1CD4AAE97}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09904ADE-7679-4B8D-8C9F-A3D1CD4AAE97}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09904ADE-7679-4B8D-8C9F-A3D1CD4AAE97}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09904ADE-7679-4B8D-8C9F-A3D1CD4AAE97}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E5CEDC28-98EF-42C9-8791-4DADFC89D463}
+	EndGlobalSection
+EndGlobal

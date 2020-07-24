@@ -24,6 +24,9 @@ namespace EntityFrameworkRepoDbCombination
             Console.WriteLine(new string(char.Parse("-"), 75));
             TruncateRepoDb();
             BulkInsertRepoDb(rows);
+            TestDelete();
+            return;
+
             AddRangeEF(rows);
             InsertAllRepoDb(rows);
             QueryEF();
@@ -65,6 +68,18 @@ namespace EntityFrameworkRepoDbCombination
             }
         }
 
+        static void TestDelete()
+        {
+            using (var repository = new DatabaseRepository())
+            {
+                var people = repository.QueryAll<Person>();
+                var person = people.First();
+                var deleted = repository.Delete<Person>(new { person.Name, person.DateOfBirth });
+                person = people.Last();
+                deleted = repository.Delete<Person>(p => p.Name == person.Name && p.DateOfBirth == person.DateOfBirth);
+            }
+        }
+
         static void TruncateRepoDb()
         {
             using (var repository = new DatabaseRepository())
@@ -80,7 +95,9 @@ namespace EntityFrameworkRepoDbCombination
             var now = DateTime.UtcNow;
             using (var repository = new DatabaseRepository())
             {
-                var affectedRows = repository.BulkInsert(people);
+                var affectedRows = repository.BulkInsert(people, isReturnIdentity: true);
+                people.ForEach(e => e.Name = $"{e.Name}-Merged");
+                repository.BulkMerge(people, qualifiers: e => new { e.Id }, isReturnIdentity: true);
                 Console.WriteLine($"RepoDb.BulkInsert: {people.Count()} row(s) affected for {(DateTime.UtcNow - now).TotalSeconds} second(s).");
             }
         }
@@ -94,31 +111,6 @@ namespace EntityFrameworkRepoDbCombination
                 context.People.AddRange(people);
                 context.SaveChanges();
                 Console.WriteLine($"EF.AddRange: {people.Count()} row(s) affected for {(DateTime.UtcNow - now).TotalSeconds} second(s).");
-            }
-        }
-
-        static void UpdateInEF()
-        {
-            using (var context = new DatabaseContext())
-            {
-                //var person = context.People.FirstOrDefault(e => e.Id == 2);
-                //person.ExtendedInfo = $"{person.ExtendedInfo}-Updated";
-                context.People.Update(new Person
-                {
-                    Id = 2,
-                    ExtendedInfo = $"{Guid.NewGuid()}-Updated"
-                });
-                context.SaveChanges();
-            }
-        }
-
-        static void DeleteInEF()
-        {
-            using (var context = new DatabaseContext())
-            {
-                context.People.Remove(new Person { Id = 1 });
-                context.People.Remove(context.People.FirstOrDefault(e => e.Id == 10));
-                context.SaveChanges();
             }
         }
 
