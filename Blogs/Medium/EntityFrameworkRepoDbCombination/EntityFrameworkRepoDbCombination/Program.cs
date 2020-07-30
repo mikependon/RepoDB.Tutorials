@@ -14,7 +14,7 @@ namespace EntityFrameworkRepoDbCombination
     {
         static void Main(string[] args)
         {
-            var rows = 100000;
+            var rows = 1000;
 
             // Initialize
             Initialize();
@@ -24,9 +24,6 @@ namespace EntityFrameworkRepoDbCombination
             Console.WriteLine(new string(char.Parse("-"), 75));
             TruncateRepoDb();
             BulkInsertRepoDb(rows);
-            TestDelete();
-            return;
-
             AddRangeEF(rows);
             InsertAllRepoDb(rows);
             QueryEF();
