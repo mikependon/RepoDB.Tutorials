@@ -6,28 +6,31 @@ open RepoDb
 open RepoDb.Extensions
 open FSharpRepoDB.Types
 
-let url (argv: string array) =
+let getUrl (argv: string array) =
     let getFromEnv =
         System.Environment.GetEnvironmentVariable("MSSQL_DB_URL")
         |> Option.ofObj
 
     let fromArgsOrEnv = 
         argv 
-        |> Array.tryFind(fun arg -> arg.Contains "--dburl=")
-        |> Option.map (fun f -> f.Split('=') |> Seq.tryLast)
+        |> Array.tryFind(fun arg -> arg.Contains "--dburl~")
+        |> Option.map (fun f -> f.Split('~') |> Seq.tryLast)
         |> Option.flatten
         |> Option.orElse getFromEnv
 
-    fromArgsOrEnv |> Option.defaultValue "Server=127.0.0.1;Database=TestDB;User Id=sa;Password=Password1!;"
+    fromArgsOrEnv |> Option.defaultValue "Server=.;Database=TestDB;Integrated Security=SSPI;"
 
 [<EntryPoint>]
 let main argv =
+    // you can set "MSSQL_DB_URL" env variable or run the following command to use a Custom URL for testing purposes
+    /// dotnet run -p FSharpRepoDB -- "--dburl~Server=127.0.0.1;Database=TestDB;User Id=sa;Password=Password1!;"
 
     // Initialize the SQL Server
     SqlServerBootstrap.Initialize()
 
     // Open the connection
-    let connection = (new SqlConnection(url argv)).EnsureOpen()
+    let url = getUrl argv
+    let connection = (new SqlConnection(url)).EnsureOpen()
     
     // Get the fields
     let personType = typedefof<Person>
