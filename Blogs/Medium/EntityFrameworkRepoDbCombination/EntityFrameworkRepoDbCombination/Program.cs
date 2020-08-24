@@ -24,6 +24,8 @@ namespace EntityFrameworkRepoDbCombination
             Console.WriteLine(new string(char.Parse("-"), 75));
             TruncateRepoDb();
             BulkInsertRepoDb(rows);
+            MergeAllRepoDb();
+            return;
             AddRangeEF(rows);
             InsertAllRepoDb(rows);
             QueryEF();
@@ -93,8 +95,6 @@ namespace EntityFrameworkRepoDbCombination
             using (var repository = new DatabaseRepository())
             {
                 var affectedRows = repository.BulkInsert(people, isReturnIdentity: true);
-                people.ForEach(e => e.Name = $"{e.Name}-Merged");
-                repository.BulkMerge(people, qualifiers: e => new { e.Id }, isReturnIdentity: true);
                 Console.WriteLine($"RepoDb.BulkInsert: {people.Count()} row(s) affected for {(DateTime.UtcNow - now).TotalSeconds} second(s).");
             }
         }
@@ -119,6 +119,55 @@ namespace EntityFrameworkRepoDbCombination
             {
                 var affectedRows = repository.InsertAll(people);
                 Console.WriteLine($"RepoDb.InsertAll: {people.Count()} row(s) affected for {(DateTime.UtcNow - now).TotalSeconds} second(s).");
+            }
+        }
+
+        static void MergeAllRepoDb()
+        {
+            var people = (IEnumerable<Person>)null;
+            using (var repository = new DatabaseRepository())
+            {
+                people = repository.QueryAll<Person>().AsList();
+            }
+            //people
+            //    .AsList()
+            //    .ForEach(p =>
+            //    {
+            //        p.Name = $"{p.Name} - Merged";
+            //    });
+            var peopleToUpdate = people
+                .Select(p => new
+                {
+                    p.Id,
+                    Name = $"{p.Name} - Merged"
+                })
+                .AsList();
+            var now = DateTime.UtcNow;
+            using (var repository = new DatabaseRepository())
+            {
+                //var affectedRows = repository.MergeAll("Person",
+                //    people,
+                //    fields: Field.From("Id", "Name"));
+                var affectedRows = repository.MergeAll("Person",
+                    entities: peopleToUpdate);
+                Console.WriteLine($"RepoDb.MergeAll: {people.Count()} row(s) affected for {(DateTime.UtcNow - now).TotalSeconds} second(s).");
+                people = repository.QueryAll<Person>().AsList();
+            }
+        }
+
+        static void InvokeMergeAll()
+        {
+            using (var repository = new DatabaseRepository())
+            {
+                var people = repository.QueryAll<Person>().AsList();
+                people
+                    .AsList()
+                    .ForEach(p =>
+                    {
+                        p.Name = $"{p.Name} - Merged";
+                    });
+                var affectedRows = repository.MergeAll("Person",
+                    entities: peopleToUpdate);
             }
         }
 

@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29728.190
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpRepoDB", "FSharpRepoDB\FSharpRepoDB.fsproj", "{A03D6A64-EB4E-456C-8C99-C8D5CE5B670D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A03D6A64-EB4E-456C-8C99-C8D5CE5B670D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A03D6A64-EB4E-456C-8C99-C8D5CE5B670D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A03D6A64-EB4E-456C-8C99-C8D5CE5B670D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A03D6A64-EB4E-456C-8C99-C8D5CE5B670D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8BDC1610-076B-4C44-B61F-BD5FFC22A337}
+	EndGlobalSection
+EndGlobal
