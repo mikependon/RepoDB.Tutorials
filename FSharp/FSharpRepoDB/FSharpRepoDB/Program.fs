@@ -32,29 +32,36 @@ let main argv =
     let url = getUrl argv
     let connection = (new SqlConnection(url)).EnsureOpen()
     
-    // Get the fields
-    let personType = typedefof<Person>
-    let dbFields = DbFieldCache.Get(connection, "Person", null).AsList()
-    let fields = FieldCache.Get(personType).AsList()
+    // Get the fields (Testing)
+    // let personType = typedefof<Person>
+    // let dbFields = DbFieldCache.Get(connection, "Person", null).AsList()
+    // let fields = FieldCache.Get(personType).AsList()
+    
+    // Truncate
+    let affectedRows = connection.Truncate<Person>();
+    Console.WriteLine("Truncated")
 
+    // Insert<TEntity>
     let person = { Id = 0L; Name = "John Doe"; Address = "New York"; Age = 32; IsActive = true }
-    
-    // Insert (Generic-Based)
     let id = connection.Insert<Person, int64>(person)
-    Console.WriteLine(Convert.ToString(id))
+    Console.WriteLine("Insert<TEntity>: Generated Id = {0}", Convert.ToString(id))
     
-    // Create PersonLike Record the type
-    let person = {| Name = "John Doe"; Age = 32; Address = "New York"; IsActive = true|}
-    // Insert (Table-Based)
+    // Insert(TableName)
+    let person = {| Name = "James Smith"; Age = 32; Address = "Washington"; IsActive = true|}
     let id = connection.Insert<int64>(ClassMappedNameCache.Get<Person>(), person)
-    Console.WriteLine(Convert.ToString(id))
-
-    // QueryAll
+    Console.WriteLine("Insert(TableName): Generated Id = {0}", Convert.ToString(id))
+    
+    // QueryAll<TEntity>
     let result = connection.QueryAll<Person>().AsList()
-    Console.WriteLine(result.Count)
+    Console.WriteLine("QueryAll<TEntity>: Count = {0}", result.Count)
+
+    // QueryAll(TableName)
+    let result = connection.QueryAll(ClassMappedNameCache.Get<Person>()).AsList()
+    Console.WriteLine("QueryAll(TableName): Count = {0}", result.Count)
 
     // Dispose the connection
     connection.Dispose()
 
     // Return values
+    let line = Console.ReadLine();
     0
