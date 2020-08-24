@@ -7,11 +7,9 @@
 
   <ItemGroup>
     <Content Include="Database\Schema.sql" />
-    <Compile Include="Models\Person.fs" />
+    <Compile Include="Types.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
-
-  <ItemGroup />
 
   <ItemGroup>
     <PackageReference Include="RepoDb.SqlServer" Version="1.0.13" />
