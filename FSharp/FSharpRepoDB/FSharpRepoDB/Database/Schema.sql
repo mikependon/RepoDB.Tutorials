@@ -10,9 +10,3 @@ GO
 
 ALTER TABLE [dbo].[Person] ADD  CONSTRAINT [DF_Person_IsActive]  DEFAULT ((1)) FOR [IsActive]
 GO
-
-ALTER TABLE [dbo].[Person] ADD  CONSTRAINT [DF_Person_CreatedDateUtc]  DEFAULT (getutcdate()) FOR [CreatedDateUtc]
-GO
-
-
-
