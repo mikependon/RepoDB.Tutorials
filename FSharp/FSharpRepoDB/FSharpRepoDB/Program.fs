@@ -47,7 +47,7 @@ let main argv =
     Console.WriteLine("Insert<TEntity>: Generated Id = {0}", Convert.ToString(id))
     
     // Insert(TableName)
-    let person = {| Name = "James Smith"; Age = 32; Address = "Washington"; IsActive = true|}
+    let person = {| Name = "James Smith"; Age = 32; Address = "Washington"; IsActive = false|}
     let id = connection.Insert<int64>(ClassMappedNameCache.Get<Person>(), person)
     Console.WriteLine("Insert(TableName): Generated Id = {0}", Convert.ToString(id))
     
@@ -58,6 +58,14 @@ let main argv =
     // QueryAll(TableName)
     let result = connection.QueryAll(ClassMappedNameCache.Get<Person>()).AsList()
     Console.WriteLine("QueryAll(TableName): Count = {0}", result.Count)
+
+    // Query with anonymous records, pull only what you need
+    let result = 
+        connection.ExecuteQuery<{| Name: string; Age: int |}>(
+            @"SELECT Name, Age FROM [dbo].[Person] WHERE IsActive = @isactive",
+            dict(["@isactive", box false ])
+        ).AsList()
+    printfn "ExecuteQuery(SQL query): Count = %i\n\tFirst Value =\n\t'%A'" result.Count (result |> Seq.tryHead)
 
     // Dispose the connection
     connection.Dispose()
