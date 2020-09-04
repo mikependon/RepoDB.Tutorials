@@ -56,6 +56,7 @@ namespace AtomicBatchBulkOperations.Controllers
                         await personRepository.InsertAsync(person, transaction: transaction);
                         ++insertedRows;
                     }
+                    transaction.Commit();
                 }
             }
             return $"Atomic: Inserted '{insertedRows}' row(s) for '{(DateTime.UtcNow - now).TotalSeconds}' second(s).";
@@ -66,7 +67,7 @@ namespace AtomicBatchBulkOperations.Controllers
         {
             var people = personFactory.GetPeople(count);
             var now = DateTime.UtcNow;
-            var insertedRows = await personRepository.InsertAllAsync(people, batchSize: 30);
+            var insertedRows = await personRepository.InsertAllAsync(people, batchSize: 50);
             return $"Atomic: Inserted '{insertedRows}' row(s) for '{(DateTime.UtcNow - now).TotalSeconds}' second(s).";
         }
 
