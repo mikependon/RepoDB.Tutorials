@@ -1,4 +1,5 @@
-﻿using AtomicBatchBulkOperations.Factories;
+﻿using AtomicBatchBulkOperations.Enumerations;
+using AtomicBatchBulkOperations.Factories;
 using AtomicBatchBulkOperations.Models;
 using AtomicBatchBulkOperations.Repositories;
 using Microsoft.AspNetCore.Mvc;
@@ -7,6 +8,7 @@ using RepoDb.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace AtomicBatchBulkOperations.Controllers
@@ -41,6 +43,34 @@ namespace AtomicBatchBulkOperations.Controllers
             return (await personRepository.QueryAsync(what: null, top: topRows, orderBy: orderBy)).AsList();
         }
 
+        [HttpGet("querytyperesult")]
+        public async Task<IEnumerable<string>> QueryTypeResult()
+        {
+            using (var connection = personRepository.CreateConnection(true))
+            {
+                return await connection.QueryAllAsync<string>(tableName: ClassMappedNameCache.Get<Person>(),
+                    fields: Field.Parse<Person>(e => e.Name));
+            }
+        }
+
+        [HttpGet("executequerytyperesult")]
+        public async Task<IEnumerable<long>> ExecuteQueryTypeResult()
+        {
+            using (var connection = personRepository.CreateConnection(true))
+            {
+                return await connection.ExecuteQueryAsync<long>("SELECT Id FROM [dbo].[Person] ORDER BY Id DESC;");
+            }
+        }
+
+        [HttpGet("executequeryenumresult")]
+        public async Task<IEnumerable<string>> ExecuteQueryEnumResult()
+        {
+            using (var connection = personRepository.CreateConnection(true))
+            {
+                return await connection.ExecuteQueryAsync<string>("SELECT Gender FROM [dbo].[Person] ORDER BY Id DESC;");
+            }
+        }
+
         [HttpPost("createatomic")]
         public async Task<string> CreateAtomic([FromBody] int count = 1000)
         {
@@ -68,7 +98,7 @@ namespace AtomicBatchBulkOperations.Controllers
             var people = personFactory.GetPeople(count);
             var now = DateTime.UtcNow;
             var insertedRows = await personRepository.InsertAllAsync(people, batchSize: 50);
-            return $"Atomic: Inserted '{insertedRows}' row(s) for '{(DateTime.UtcNow - now).TotalSeconds}' second(s).";
+            return $"Batch: Inserted '{insertedRows}' row(s) for '{(DateTime.UtcNow - now).TotalSeconds}' second(s).";
         }
 
         [HttpPost("createbulk")]
@@ -77,7 +107,7 @@ namespace AtomicBatchBulkOperations.Controllers
             var people = personFactory.GetPeople(count);
             var now = DateTime.UtcNow;
             var insertedRows = await personRepository.BulkInsertAsync(people);
-            return $"Atomic: Inserted '{insertedRows}' row(s) for '{(DateTime.UtcNow - now).TotalSeconds}' second(s).";
+            return $"Bulk: Inserted '{insertedRows}' row(s) for '{(DateTime.UtcNow - now).TotalSeconds}' second(s).";
         }
 
         [HttpPost("createdynamic")]

@@ -1,4 +1,5 @@
-﻿using AtomicBatchBulkOperations.Models;
+﻿using AtomicBatchBulkOperations.Enumerations;
+using AtomicBatchBulkOperations.Models;
 using System;
 using System.Collections.Generic;
 
@@ -14,6 +15,7 @@ namespace AtomicBatchBulkOperations.Factories
                 yield return new Person
                 {
                     Name = $"Name={i}",
+                    Gender = random.Next(100) > 50 ? Gender.Male : Gender.Female,
                     DateOfBirth = DateTime.UtcNow.AddDays(random.Next(100)),
                     CreatedDateUtc = DateTime.UtcNow,
                     ExtendedInfo = $"ExtendedInfo-{i}",

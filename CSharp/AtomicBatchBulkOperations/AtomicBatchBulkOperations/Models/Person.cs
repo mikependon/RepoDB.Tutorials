@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AtomicBatchBulkOperations.Enumerations;
+using System;
 
 namespace AtomicBatchBulkOperations.Models
 {
@@ -6,6 +7,7 @@ namespace AtomicBatchBulkOperations.Models
     {
         public long Id { get; set; }
         public string Name { get; set; }
+        public Gender? Gender { get; set; }
         public DateTime? DateOfBirth { get; set; }
         public int Age { get; set; }
         public string ExtendedInfo { get; set; }
