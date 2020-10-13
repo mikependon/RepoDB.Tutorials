@@ -23,7 +23,6 @@ namespace SftpIntegrationSolution
             Bootstrap();
             
             var tables = GetTables();
-
             foreach (var table in tables)
             {
                 var data = QueryTable(table.TableName, table.ColumnName, table.LastValue);
@@ -35,18 +34,18 @@ namespace SftpIntegrationSolution
             }
         }
 
+        static void Bootstrap()
+        {
+            SqlServerBootstrap.Initialize();
+            JobStorage.Current = new MemoryStorage();
+        }
+
         static void EnsureDirectory(string path)
         {
             if (!Directory.Exists(path))
             {
                 Directory.CreateDirectory(path);
             }
-        }
-
-        static void Bootstrap()
-        {
-            SqlServerBootstrap.Initialize();
-            JobStorage.Current = new MemoryStorage();
         }
 
         static IEnumerable<dynamic> GetTables()
