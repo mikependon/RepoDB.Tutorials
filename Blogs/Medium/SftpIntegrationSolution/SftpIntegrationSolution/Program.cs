@@ -15,15 +15,24 @@ namespace SftpIntegrationSolution
 {
     class Program
     {
+        private static readonly string connectionString = 
+            "Server=(local);Database=Test;Integrated Security=SSPI;";
+
         static void Main(string[] args)
         {
             Bootstrap();
-            var data = QueryData(0);
-            var csvPath = SaveCsv(data);
-            var zipPath = Compress(csvPath);
-            UploadToSftp(zipPath);
-            File.Delete(csvPath);
-            File.Delete(zipPath);
+            
+            var tables = GetTables();
+
+            foreach (var table in tables)
+            {
+                var data = QueryTable(table.TableName, table.ColumnName, table.LastValue);
+                var csvPath = SaveCsv(data);
+                var zipPath = Compress(csvPath);
+                UploadToSftp(zipPath);
+                File.Delete(csvPath);
+                File.Delete(zipPath);
+            }
         }
 
         static void EnsureDirectory(string path)
@@ -40,12 +49,22 @@ namespace SftpIntegrationSolution
             JobStorage.Current = new MemoryStorage();
         }
 
-        static IEnumerable<dynamic> QueryData(long lastId)
+        static IEnumerable<dynamic> GetTables()
         {
-            using (var connection = new SqlConnection("Server=(local);Database=Test;Integrated Security=SSPI;"))
+            using (var connection = new SqlConnection(connectionString))
             {
-                var where = new QueryField("Id", Operation.GreaterThan, lastId);
-                return connection.Query("Person", where);
+                return connection.QueryAll("Status");
+            }
+        }
+
+        static IEnumerable<dynamic> QueryTable(string tableName,
+            string columnName,
+            object lastValue)
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                var where = new QueryField(columnName, Operation.GreaterThan, lastValue);
+                return connection.Query(tableName, where);
             }
         }
 
@@ -85,16 +104,23 @@ namespace SftpIntegrationSolution
                     var previousValue = (double)0;
                     sftpClient.UploadFile(stream, zipPath, (value) =>
                     {
-                        var percentage = ((double)value / stream.Length) * 100;
-                        var megaBytes = (double)value / (1024 * 1024);
-                        var dividend = Math.Floor(percentage / 5);
-                        if (dividend > previousValue)
-                        {
-                            previousValue = dividend;
-                            Console.WriteLine($"\n\t--> Completed: {percentage.ToString("##0.00")}% ({megaBytes.ToString("###0.00")} MB)");
-                        }
+                        WriteProgress(value, stream.Length, ref previousValue);
                     });
                 }
+            }
+        }
+
+        static void WriteProgress(ulong value,
+            long streamLength,
+            ref double previousValue)
+        {
+            var percentage = ((double)value / streamLength) * 100;
+            var megaBytes = (double)value / (1024 * 1024);
+            var dividend = Math.Floor(percentage / 5);
+            if (dividend > previousValue)
+            {
+                previousValue = dividend;
+                Console.WriteLine($"\n\t--> Completed: {percentage.ToString("##0.00")}% ({megaBytes.ToString("###0.00")} MB)");
             }
         }
     }
