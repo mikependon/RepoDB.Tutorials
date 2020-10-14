@@ -15,13 +15,17 @@ namespace SftpIntegrationSolution
 {
     class Program
     {
-        private static readonly string connectionString = 
+        private static readonly string connectionString =
             "Server=(local);Database=Test;Integrated Security=SSPI;";
 
         static void Main(string[] args)
         {
             Bootstrap();
-            
+            UploadToSftp();
+        }
+
+        static void UploadToSftp()
+        {
             var tables = GetTables();
             foreach (var table in tables)
             {
@@ -52,7 +56,7 @@ namespace SftpIntegrationSolution
         {
             using (var connection = new SqlConnection(connectionString))
             {
-                return connection.QueryAll("Status");
+                return connection.QueryAll("Status", hints: SqlServerTableHints.NoLock);
             }
         }
 
@@ -63,7 +67,7 @@ namespace SftpIntegrationSolution
             using (var connection = new SqlConnection(connectionString))
             {
                 var where = new QueryField(columnName, Operation.GreaterThan, lastValue);
-                return connection.Query(tableName, where);
+                return connection.Query(tableName, where, hints: SqlServerTableHints.NoLock);
             }
         }
 
@@ -119,8 +123,32 @@ namespace SftpIntegrationSolution
             if (dividend > previousValue)
             {
                 previousValue = dividend;
-                Console.WriteLine($"\n\t--> Completed: {percentage.ToString("##0.00")}% ({megaBytes.ToString("###0.00")} MB)");
+                Console.WriteLine($"\n\t--> Completed: {percentage.ToString("##0.00")}% " +
+                    $"({megaBytes.ToString("###0.00")} MB)");
             }
+        }
+
+        static void SetLastValue(string tableName,
+            object lastValue)
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Merge(tableName, new { tableName, lastValue }, qualifiers: Field.From("TableName"));
+            }
+        }
+
+        static object GetMaxId(string tableName,
+            string columnName)
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                return connection.MaxAll(tableName, new Field(columnName));
+            }
+        }
+
+        static void ConfigureSchedules()
+        {
+            RecurringJob.AddOrUpdate("UploadToSftp", () => UploadToSftp(), Cron.Hourly());
         }
     }
 }
