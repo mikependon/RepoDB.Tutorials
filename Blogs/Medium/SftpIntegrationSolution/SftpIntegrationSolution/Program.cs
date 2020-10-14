@@ -5,11 +5,13 @@ using Microsoft.Data.SqlClient;
 using Renci.SshNet;
 using RepoDb;
 using RepoDb.Enumerations;
+using RepoDb.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 
 namespace SftpIntegrationSolution
 {
@@ -21,23 +23,28 @@ namespace SftpIntegrationSolution
         static void Main(string[] args)
         {
             Bootstrap();
-            UploadToSftp();
+            ConfigureSchedules();
+            Console.ReadLine();
         }
 
-        static void UploadToSftp()
+        public static void Process()
         {
+            var folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "CSV",
+                $"Data-{DateTime.UtcNow.ToString("yyyyMMddHHmmss")}");
             var tables = GetTables();
+
             foreach (var table in tables)
             {
-                var data = QueryTable(table.TableName, table.ColumnName, table.LastValue);
-                var maxId = GetMaxId(table.TableName, table.ColumnName);
-                var csvPath = SaveCsv(data);
-                var zipPath = Compress(csvPath);
-                UploadToSftp(zipPath);
+                var data = QueryTable(table.TableName, table.ColumnName, table.Value);
+                var csvPath = SaveCsv(folder, table.TableName, data);
+                Console.WriteLine($"The CSV '{csvPath}' has been created.");
+                var maxId = GetMaxId(data, table.ColumnName);
                 SaveLastValue(table.TableName, maxId);
-                File.Delete(csvPath);
-                File.Delete(zipPath);
             }
+
+            var zipPath = Compress(folder);
+            UploadToSftp(zipPath);
+            File.Delete(zipPath);
         }
 
         static void Bootstrap()
@@ -69,15 +76,19 @@ namespace SftpIntegrationSolution
             using (var connection = new SqlConnection(connectionString))
             {
                 var where = new QueryField(columnName, Operation.GreaterThan, lastValue);
-                return connection.Query(tableName, where, hints: SqlServerTableHints.NoLock);
+                var orderBy = new OrderField(columnName, Order.Ascending);
+                var top = 100;
+                return connection.Query(tableName, where, top: top,
+                    orderBy: orderBy.AsEnumerable(), hints: SqlServerTableHints.NoLock);
             }
         }
 
-        static string SaveCsv(IEnumerable<dynamic> data)
+        static string SaveCsv(string folder,
+            string tableName,
+            IEnumerable<dynamic> data)
         {
-            var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "CSV");
-            EnsureDirectory(path);
-            var fileName = Path.Combine(path, $"Person-{DateTime.UtcNow.ToString("yyyyMMddHHmmss")}.csv");
+            EnsureDirectory(folder);
+            var fileName = Path.Combine(folder, $"{tableName}.csv");
             using (var writer = new StreamWriter(fileName))
             {
                 using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
@@ -85,7 +96,7 @@ namespace SftpIntegrationSolution
                     csv.WriteRecords(data);
                 }
             }
-            return path;
+            return fileName;
         }
 
         static string Compress(string path)
@@ -97,17 +108,24 @@ namespace SftpIntegrationSolution
 
         static void UploadToSftp(string zipPath)
         {
-            var connectionInfo = new ConnectionInfo("SftpServer",
-                   "Username",
-                   new PasswordAuthenticationMethod("Username", "Password"),
-                   new PrivateKeyAuthenticationMethod("rsa.key"));
+            var connectionInfo = new ConnectionInfo("sftp.company.com",
+                "SftpUser",
+                new PasswordAuthenticationMethod("SftpUser", "SftpPassword"),
+                new PrivateKeyAuthenticationMethod("rsa.key"));
 
             using (var sftpClient = new SftpClient(connectionInfo))
             {
+                sftpClient.Connect();
                 using (var stream = new FileStream(zipPath, FileMode.Open, FileAccess.Read))
                 {
+                    var directory = "\\TopLevelFolder\\Data";
+                    if (sftpClient.Exists(directory) == false)
+                    {
+                        sftpClient.CreateDirectory(directory);
+                    }
+                    var fileName = Path.Combine(directory, Path.GetFileName(zipPath));
                     var previousValue = (double)0;
-                    sftpClient.UploadFile(stream, zipPath, (value) =>
+                    sftpClient.UploadFile(stream, fileName, (value) =>
                     {
                         WriteProgress(value, stream.Length, ref previousValue);
                     });
@@ -131,26 +149,24 @@ namespace SftpIntegrationSolution
         }
 
         static void SaveLastValue(string tableName,
-            object lastValue)
+            object value)
         {
             using (var connection = new SqlConnection(connectionString))
             {
-                connection.Merge(tableName, new { tableName, lastValue }, qualifiers: Field.From("TableName"));
+                connection.Merge("Status", new { tableName, value }, qualifiers: Field.From("TableName"));
             }
         }
 
-        static object GetMaxId(string tableName,
+        static object GetMaxId(IEnumerable<dynamic> data,
             string columnName)
         {
-            using (var connection = new SqlConnection(connectionString))
-            {
-                return connection.MaxAll(tableName, new Field(columnName));
-            }
+            var kvps = data?.OfType<IDictionary<string, object>>();
+            return kvps.Max(e => e[columnName]);
         }
 
         static void ConfigureSchedules()
         {
-            RecurringJob.AddOrUpdate("UploadToSftp", () => UploadToSftp(), Cron.Hourly());
+            RecurringJob.AddOrUpdate("UploadToSftp", () => Process(), Cron.Minutely());
         }
     }
 }
