@@ -30,9 +30,11 @@ namespace SftpIntegrationSolution
             foreach (var table in tables)
             {
                 var data = QueryTable(table.TableName, table.ColumnName, table.LastValue);
+                var maxId = GetMaxId(table.TableName, table.ColumnName);
                 var csvPath = SaveCsv(data);
                 var zipPath = Compress(csvPath);
                 UploadToSftp(zipPath);
+                SaveLastValue(table.TableName, maxId);
                 File.Delete(csvPath);
                 File.Delete(zipPath);
             }
@@ -128,7 +130,7 @@ namespace SftpIntegrationSolution
             }
         }
 
-        static void SetLastValue(string tableName,
+        static void SaveLastValue(string tableName,
             object lastValue)
         {
             using (var connection = new SqlConnection(connectionString))
