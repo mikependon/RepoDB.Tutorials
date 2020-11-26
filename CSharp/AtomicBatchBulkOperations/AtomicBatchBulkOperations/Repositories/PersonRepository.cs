@@ -10,7 +10,7 @@ namespace AtomicBatchBulkOperations.Repositories
     public class PersonRepository : BaseRepository<Person, SqlConnection>
     {
         public PersonRepository() :
-            base("Server=PC79000;Database=RepoDB;Integrated Security=SSPI;")
+            base("Server=.;Database=DemoRepoDB2;Integrated Security=SSPI;")
         { }
 
         public async Task<int> SaveAllAsync(IEnumerable<Person> people)

@@ -35,40 +35,12 @@ namespace AtomicBatchBulkOperations.Controllers
             return $"The table Person has been cleared with '{deletedRows}' row(s) affected for '{(DateTime.UtcNow - now).TotalSeconds}' second(s).";
         }
 
-        [HttpGet]
+        [HttpGet()]
         public async Task<IEnumerable<Person>> Get()
         {
             var orderBy = OrderField.Descending<Person>(p => p.Id).AsEnumerable();
             var topRows = 10;
             return (await personRepository.QueryAsync(what: null, top: topRows, orderBy: orderBy)).AsList();
-        }
-
-        [HttpGet("querytyperesult")]
-        public async Task<IEnumerable<string>> QueryTypeResult()
-        {
-            using (var connection = personRepository.CreateConnection(true))
-            {
-                return await connection.QueryAllAsync<string>(tableName: ClassMappedNameCache.Get<Person>(),
-                    fields: Field.Parse<Person>(e => e.Name));
-            }
-        }
-
-        [HttpGet("executequerytyperesult")]
-        public async Task<IEnumerable<long>> ExecuteQueryTypeResult()
-        {
-            using (var connection = personRepository.CreateConnection(true))
-            {
-                return await connection.ExecuteQueryAsync<long>("SELECT Id FROM [dbo].[Person] ORDER BY Id DESC;");
-            }
-        }
-
-        [HttpGet("executequeryenumresult")]
-        public async Task<IEnumerable<string>> ExecuteQueryEnumResult()
-        {
-            using (var connection = personRepository.CreateConnection(true))
-            {
-                return await connection.ExecuteQueryAsync<string>("SELECT Gender FROM [dbo].[Person] ORDER BY Id DESC;");
-            }
         }
 
         [HttpPost("createatomic")]
