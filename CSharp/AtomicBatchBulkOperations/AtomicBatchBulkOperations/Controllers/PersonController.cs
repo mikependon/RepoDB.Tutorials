@@ -31,8 +31,8 @@ namespace AtomicBatchBulkOperations.Controllers
         public async Task<string> Clear()
         {
             var now = DateTime.UtcNow;
-            var deletedRows = await personRepository.DeleteAllAsync();
-            return $"The table Person has been cleared with '{deletedRows}' row(s) affected for '{(DateTime.UtcNow - now).TotalSeconds}' second(s).";
+            await personRepository.TruncateAsync(transaction: null);
+            return $"The table Person has been cleared. Elapsed time is '{(DateTime.UtcNow - now).TotalSeconds}' second(s).";
         }
 
         [HttpGet()]
