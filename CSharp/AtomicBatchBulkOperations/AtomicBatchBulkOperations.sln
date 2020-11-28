@@ -7,6 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AtomicBatchBulkOperations",
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "References", "References", "{1F72E138-E2C4-4CEA-A7E5-88C407CEBC8A}"
 	ProjectSection(SolutionItems) = preProject
+		References\Postman.json = References\Postman.json
 		References\Schema.sql = References\Schema.sql
 	EndProjectSection
 EndProject
