@@ -1,5 +1,8 @@
 ﻿using EntityFrameworkRawSQL.Models;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using RepoDb;
+using RepoDb.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,9 +13,34 @@ namespace EntityFrameworkRawSQL
     {
         static void Main(string[] args)
         {
-            AddRange(1000);
-            TruncateFromSqlRaw();
-            QueryFromSqlRaw();
+            Initialize();
+            Truncate();
+            Console.WriteLine("[ADD]");
+            AddRangeForEF(1000);
+            AddRangeForRepoDB(1000);
+
+            Console.WriteLine("");
+            Console.WriteLine("[QUERY]");
+            QueryForEF();
+            QueryForRepoDB();
+
+            Console.WriteLine("");
+            Console.WriteLine("[RAW-QUERY]");
+            QueryFromSqlRawForEF();
+            QueryFromSqlRawForRepoDB();
+        }
+
+        static void Initialize()
+        {
+            SqlServerBootstrap.Initialize();
+        }
+
+        static void Truncate()
+        {
+            using (var connection = new SqlConnection("Server=.;Database=TestDB;Integrated Security=SSPI;"))
+            {
+                connection.Truncate<Person>();
+            }
         }
 
         static IEnumerable<Person> GetPeople(int count)
@@ -31,7 +59,7 @@ namespace EntityFrameworkRawSQL
             }
         }
 
-        static void AddRange(int count)
+        static void AddRangeForEF(int count)
         {
             var people = GetPeople(count).ToList();
             var now = DateTime.UtcNow;
@@ -43,22 +71,54 @@ namespace EntityFrameworkRawSQL
             }
         }
 
-        static void TruncateFromSqlRaw()
+        static void AddRangeForRepoDB(int count)
         {
-            using (var context = new DatabaseContext())
+            var people = GetPeople(count).ToList();
+            var now = DateTime.UtcNow;
+            using (var connection = new SqlConnection("Server=.;Database=TestDB;Integrated Security=SSPI;"))
             {
-                context.People.FromSqlRaw("TRUNCATE TABLE [dbo].[Person];");
-                context.SaveChanges();
+                connection.InsertAll(people);
+                Console.WriteLine($"RepoDB.InsertAll: {people.Count()} row(s) affected for {(DateTime.UtcNow - now).TotalSeconds} second(s).");
             }
         }
 
-        static void QueryFromSqlRaw()
+        static void QueryForEF()
+        {
+            var now = DateTime.UtcNow;
+            using (var context = new DatabaseContext())
+            {
+                var people = context.People.ToList();
+                Console.WriteLine($"EF.People: {people.Count()} row(s) affected for {(DateTime.UtcNow - now).TotalSeconds} second(s).");
+            }
+        }
+
+        static void QueryFromSqlRawForEF()
         {
             var now = DateTime.UtcNow;
             using (var context = new DatabaseContext())
             {
                 var people = context.People.FromSqlRaw("SELECT * FROM [dbo].[Person];").ToList();
-                Console.WriteLine($"EF.People (Raw): {people.Count()} row(s) affected for {(DateTime.UtcNow - now).TotalSeconds} second(s).");
+                Console.WriteLine($"EF.FromSqlRaw: {people.Count()} row(s) affected for {(DateTime.UtcNow - now).TotalSeconds} second(s).");
+            }
+        }
+
+        static void QueryForRepoDB()
+        {
+            var now = DateTime.UtcNow;
+            using (var connection = new SqlConnection("Server=.;Database=TestDB;Integrated Security=SSPI;"))
+            {
+                var people = connection.QueryAll<Person>();
+                Console.WriteLine($"RepoDB.QueryAll: {people.Count()} row(s) affected for {(DateTime.UtcNow - now).TotalSeconds} second(s).");
+            }
+        }
+
+        static void QueryFromSqlRawForRepoDB()
+        {
+            var now = DateTime.UtcNow;
+            using (var connection = new SqlConnection("Server=.;Database=TestDB;Integrated Security=SSPI;"))
+            {
+                var people = connection.ExecuteQuery<Person>("SELECT * FROM [dbo].[Person];").AsList();
+                Console.WriteLine($"RepoDB.ExecuteQuery: {people.Count()} row(s) affected for {(DateTime.UtcNow - now).TotalSeconds} second(s).");
             }
         }
     }
