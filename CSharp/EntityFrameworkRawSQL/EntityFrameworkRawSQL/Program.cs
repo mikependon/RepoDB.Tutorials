@@ -16,8 +16,8 @@ namespace EntityFrameworkRawSQL
             Initialize();
             Truncate();
             Console.WriteLine("[ADD]");
-            AddRangeForEF(1000);
-            AddRangeForRepoDB(1000);
+            AddRangeForEF(10000);
+            AddRangeForRepoDB(10000);
 
             Console.WriteLine("");
             Console.WriteLine("[QUERY]");
