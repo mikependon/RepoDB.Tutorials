@@ -10,7 +10,7 @@
     <PackageReference Include="Hangfire.Core" Version="1.7.15" />
     <PackageReference Include="Hangfire.MemoryStorage" Version="1.7.0" />
     <PackageReference Include="RepoDb.SqlServer" Version="1.1.1" />
-    <PackageReference Include="SSH.Net" Version="2016.1.0" />
+    <PackageReference Include="SSH.Net" Version="2020.0.2" />
   </ItemGroup>
 
 </Project>
